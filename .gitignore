@@ -1,5 +1,4 @@
 node_modules/
-scene/
-scene-src/robrowser/
 
 .cache/
+studio-mobile-*.png

@@ -6,7 +6,7 @@ Choose gender, classic job, hair style, hair color (0–263), and clothing color
 
 All appearance changes retain the previous visible character until the next look is ready. Loaded sprite/action data is reused; failed changes leave the previous look visible. Palette-only changes replace only the affected part's palette. Cached palettes are reused and stale responses are ignored.
 
-Backgrounds are Light or Dark. PNG export stays transparent. Display settings and appearance persist locally; Reset restores defaults.
+Backgrounds include Light, Dark, Prontera main street, and Glast Heim courtyard. The map options load real RSW/GND/GAT terrain, models and textures from Niktout. The preview sprite is rendered at a fixed map position through roBrowser's depth-tested SpriteRenderer; rotation orbits the map camera, and zoom scales the map and character together. Maps load only when selected; switching to a plain background destroys the isolated scene and its worker. Character appearance stays loaded throughout. A failed or timed-out map leaves the ordinary preview usable. PNG export stays transparent. Display settings and appearance persist locally; Reset restores defaults.
 
 ## Niktout catalogue
 
@@ -29,3 +29,9 @@ Run npm ci and npm run build:aura to regenerate the committed aura/aura.js bundl
 ## Credits and license
 
 GPL-3.0; see LICENSE. SPR/ACT/Targa loaders, job/hair/palette tables, and original aura effects are from MrAntares/roBrowserLegacy (https://github.com/MrAntares/roBrowserLegacy), retaining notices. gl-matrix retains its upstream license; Poppins is distributed under fonts/OFL.txt. Game artwork is fetched at runtime and is not covered by the code license. No Chrome extension source is required.
+
+## Map renderer build
+
+`npm ci && npm run build:scene` builds the committed `scene/` bundle from `scene-src/entry.js` and the roBrowserLegacy source snapshot in `scene-src/robrowser/` (GPL-3.0, upstream notices retained). Optional `ROBROWSER_SOURCE` selects another compatible source tree. The map iframe does not log in or connect to a game server. Default map locations: Prontera (156, 180), Glast Heim (200, 265). Scene rendering is capped at 30 fps and pixel density at 1× to limit mobile GPU work. Maps need WebGL 2 and network access to the asset server; their first load is larger than the plain backgrounds. PNG export continues to save the transparent character only.
+
+`npx playwright install chromium && npm run test:scene` runs the mobile map regression against the public asset server (network required). Set `STUDIO_URL` to check a hosted deployment. It covers both maps, all eight headings, shared zoom, fixed world position, character asset reuse, teardown, and load-error recovery. Physical-device GPU performance still needs device testing.
