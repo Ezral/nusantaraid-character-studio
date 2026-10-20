@@ -15,10 +15,12 @@ const robeStart=bundle.indexOf("define('DB/Items/RobeTable'"),robeEnd=bundle.ind
 const robes={};for(const m of bundle.slice(robeStart,robeEnd).matchAll(/(\d+):\s*'((?:\\.|[^'\\])*)'/g))robes[m[1]]=decode(m[2]);
 // Garment views absent from the client item table: cross-checked against
 // rAthena db/re/item_db_equip.yml and Niktout SPRITE_ROBE_IDs + served SPR/ACT assets.
-const garmentViews={20507:16,20512:2};
+// Magic book and floating ball: views from rAthena; HatTable paths and SPR/ACT verified on Niktout.
+const verifiedViews={20507:16,20512:2,31395:1691,31568:1760};
+names[31568] ||= 'Costume Floating Ball';hats[1691] ||= '_Book_Of_Magic';hats[1760] ||= '_Floating_Ball';
 const items=[];
 for(const [id,name] of Object.entries(names)){
- const d=desc[id]||'',v=view[id]||garmentViews[id];if(!v)continue;
+ const d=desc[id]||'',v=view[id]||verifiedViews[id];if(!v)continue;
  const position=d.match(/(?:Position|Location|Equipped on)\s*:\s*([^\r\n]+)/i)?.[1]||'';
  const slots=['upper','middle','lower'].filter(s=>new RegExp(s,'i').test(position));
  const costume=/Class\s*:\s*Costume/i.test(d)||/^Costume[_ ]/i.test(name);
@@ -27,6 +29,7 @@ for(const [id,name] of Object.entries(names)){
  else if(slots.length&&hats[v]&&(/Class\s*:\s*(?:Headgear|Costume)/i.test(d)||costume))items.push({id:Number(id),name:name.replaceAll('_',' '),view:v,costume,slots});
 }
 const resources=pairs('idnum2itemresnametable.txt'),icons={};for(const item of items)if(resources[item.id])icons[item.id]=resources[item.id];
+icons[31395]='Book_Of_Magic';icons[31568]='Floating_Ball';
 fs.writeFileSync(path.join(repo,'item-icons.js'),'// Niktout identified item icon resources, keyed by item ID.\nexport default '+JSON.stringify(icons)+';\n');
 const out={source:'https://classicweb.niktoutro.com/',date:new Date().toISOString().slice(0,10),items,hats,robes};
 fs.writeFileSync(path.join(repo,'niktout-items.js'),'// Generated from Niktout Classic public client tables. Item IDs, not view IDs.\nexport default '+JSON.stringify(out)+';\n');

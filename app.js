@@ -1,6 +1,6 @@
-import {initMobileControls} from './mobile-controls.js?v=20261020-picker14';
-import {initDisplay,drawAura,auraActive,resetDisplay} from './display.js?v=20261020-picker14';
-import Catalogue from './niktout-items.js?v=20261020-picker14';
+import {initMobileControls} from './mobile-controls.js?v=20261020-costumes15';
+import {initDisplay,drawAura,auraActive,resetDisplay} from './display.js?v=20261020-costumes15';
+import Catalogue from './niktout-items.js?v=20261020-costumes15';
 const Hats=Catalogue.hats,Robes=Catalogue.robes,itemsById=new Map(Catalogue.items.map(item=>[item.id,item]));
 import SPR from './vendor/Sprite.js';
 import ACT from './vendor/Action.js';
@@ -9,6 +9,7 @@ import Palettes from './vendor/PalNameTable.js';
 import Hair from './vendor/HairIndexTable.js';
 const $=id=>document.getElementById(id), endpoint='https://classicweb.niktoutro.com/client/';
 const jobs=[[0,'Novice'],[1,'Swordsman'],[2,'Mage'],[3,'Archer'],[4,'Acolyte'],[5,'Merchant'],[6,'Thief'],[7,'Knight'],[8,'Priest'],[9,'Wizard'],[10,'Blacksmith'],[11,'Hunter'],[12,'Assassin'],[14,'Crusader'],[15,'Monk'],[16,'Sage'],[17,'Rogue'],[18,'Alchemist'],[19,'Bard'],[20,'Dancer'],[23,'Super Novice']];
+const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 const equipment=['upper','middle','lower','costumeUpper','costumeMiddle','costumeLower','garment'];
 const fields=['gender','job','hair','hairColor','costumeColor',...equipment];
 const initial={gender:1,job:3,hair:1,hairColor:0,costumeColor:0,...Object.fromEntries(equipment.map(k=>[k,0]))};let state={...initial},direction=0,zoom=3,current=null,revision=0;
@@ -51,13 +52,13 @@ const hats=[],seen=new Set();
 const selected=equipment.filter(key=>key!=='garment').map(key=>itemsById.get(look[key])).filter(Boolean);
 const covered=new Set(selected.filter(item=>item.costume).flatMap(item=>item.slots));
 const visible=selected.filter(item=>item.costume||!item.slots.some(slot=>covered.has(slot))).sort((a,b)=>Math.max(...a.slots.map(slot=>['middle','upper','lower'].indexOf(slot)))-Math.max(...b.slots.map(slot=>['middle','upper','lower'].indexOf(slot))));
-for(const item of visible){const visual=item.view;if(seen.has(visual))continue;seen.add(visual);try{const p=await part('data/sprite/\xbe\xc7\xbc\xbc\xbb\xe7\xb8\xae/'+sex+'/'+sex+Hats[visual]);p.images=new Map();hats.push(p);}catch{warnings.push(item.name+' unavailable for this look.');}}
-let robe=null;if(look.garment){const item=itemsById.get(look.garment),name=Robes[item.view],base='data/sprite/\xb7\xce\xba\xea/'+name+'/';try{try{robe=await part(base+sex+'/'+Jobs[look.job]+'_'+sex);}catch{robe=await part(base+name);}robe.images=new Map();}catch{warnings.push(item.name+' unavailable for this look.');}}
-if(id!==revision)return;current={body,hair,hats,robe,look,warnings,paletteWarnings,paletteVersions:{},pendingPalettes:new Set()};$('look-name').textContent=jobs.find(j=>j[0]===look.job)[1]+' · '+(look.gender?'Male':'Female');paletteStatus();draw();}catch(e){if(id===revision){$('status').textContent=current?'This look could not load; keeping the previous look.':'This look could not load. Try another style or check your connection.';$('export').disabled=true;draw();}}}
+for(const item of visible){const visual=item.view;if(seen.has(visual))continue;seen.add(visual);try{const p=await part('data/sprite/\xbe\xc7\xbc\xbc\xbb\xe7\xb8\xae/'+sex+'/'+sex+Hats[visual]);p.images=new Map();p.animated=item.costume;hats.push(p);}catch{warnings.push(item.name+' unavailable for this look.');}}
+let robe=null;if(look.garment){const item=itemsById.get(look.garment),name=Robes[item.view],base='data/sprite/\xb7\xce\xba\xea/'+name+'/';try{try{robe=await part(base+sex+'/'+Jobs[look.job]+'_'+sex);}catch{robe=await part(base+name);}robe.images=new Map();robe.animated=true;}catch{warnings.push(item.name+' unavailable for this look.');}}
+if(id!==revision)return;current={started:performance.now(),body,hair,hats,robe,look,warnings,paletteWarnings,paletteVersions:{},pendingPalettes:new Set()};$('look-name').textContent=jobs.find(j=>j[0]===look.job)[1]+' · '+(look.gender?'Male':'Female');paletteStatus();draw();}catch(e){if(id===revision){$('status').textContent=current?'This look could not load; keeping the previous look.':'This look could not load. Try another style or check your connection.';$('export').disabled=true;draw();}}}
 function frameImage(part,index){if(part.images.has(index))return part.images.get(index);const f=part.spr.frames[index];if(!f||!f.width||!f.height)return null;const c=document.createElement('canvas');c.width=f.width;c.height=f.height;const ctx=c.getContext('2d'),image=ctx.createImageData(f.width,f.height),pal=part.palette||part.spr.palette;for(let y=0;y<f.height;y++)for(let x=0;x<f.width;x++){const i=y*f.width+x,j=i*4;if(f.type===0){const n=f.data[i];image.data[j]=pal[n*4];image.data[j+1]=pal[n*4+1];image.data[j+2]=pal[n*4+2];image.data[j+3]=n?255:0;}else{const k=((f.height-1-y)*f.width+x)*4;image.data[j]=f.data[k+3];image.data[j+1]=f.data[k+2];image.data[j+2]=f.data[k+1];image.data[j+3]=f.data[k];}}ctx.putImageData(image,0,0);part.images.set(index,c);return c;}
-function layers(){
+function layers(animate=true){
  if(!current)return [];
- const anim=p=>p.act.actions[direction%p.act.actions.length]?.animations[0];
+ const anim=p=>{const action=p.act.actions[direction%p.act.actions.length];if(!action)return null;const index=animate&&p.animated&&!reducedMotion.matches?Math.floor((performance.now()-current.started)/Math.max(1,action.delay||150))%action.animations.length:0;return action.animations[index];};
  const body=anim(current.body),hair=anim(current.hair);if(!body||!hair)return [];
  const anchor=body.pos[0]||{x:0,y:0};
  const attached=p=>{const a=anim(p);if(!a)return null;const h=a.pos[0];return [p,a,h?anchor.x-h.x:0,h?anchor.y-h.y:0];};
@@ -65,14 +66,14 @@ function layers(){
  if(current.robe){const a=anim(current.robe);if(a){const row=[current.robe,a,0,0];if(direction>2&&direction<6)parts.push(row);else parts.unshift(row);}}
  return parts.flatMap(([part,a,ox,oy])=>a.layers.filter(l=>l.index>=0).map(l=>({part,l,x:l.pos[0]+ox,y:l.pos[1]+oy})));
 }
-function render(ctx,scale,cx,cy){const list=layers();if(!list.length)return;let minY=Infinity,maxY=-Infinity,minX=Infinity,maxX=-Infinity;for(const row of list){const im=frameImage(row.part,row.l.index+(row.l.spr_type?row.part.spr.rgba_index:0));if(!im)continue;row.im=im;minY=Math.min(minY,row.y-im.height*Math.abs(row.l.scale[1])/2);maxY=Math.max(maxY,row.y+im.height*Math.abs(row.l.scale[1])/2);minX=Math.min(minX,row.x-im.width*Math.abs(row.l.scale[0])/2);maxX=Math.max(maxX,row.x+im.width*Math.abs(row.l.scale[0])/2);}
+function render(ctx,scale,cx,cy){const list=layers();if(!list.length)return;for(const row of list)row.im=frameImage(row.part,row.l.index+(row.l.spr_type?row.part.spr.rgba_index:0));let minY=Infinity,maxY=-Infinity,minX=Infinity,maxX=-Infinity;for(const row of layers(false)){const im=frameImage(row.part,row.l.index+(row.l.spr_type?row.part.spr.rgba_index:0));if(!im)continue;row.im=im;minY=Math.min(minY,row.y-im.height*Math.abs(row.l.scale[1])/2);maxY=Math.max(maxY,row.y+im.height*Math.abs(row.l.scale[1])/2);minX=Math.min(minX,row.x-im.width*Math.abs(row.l.scale[0])/2);maxX=Math.max(maxX,row.x+im.width*Math.abs(row.l.scale[0])/2);}
 ctx.save();ctx.translate(cx,cy);ctx.scale(scale,scale);ctx.translate(-(minX+maxX)/2,-(minY+maxY)/2);drawAura(ctx,0,0,1);ctx.imageSmoothingEnabled=false;for(const {im,l,x,y} of list){if(!im)continue;ctx.save();ctx.translate(x,y);ctx.rotate(l.angle*Math.PI/180);ctx.scale(l.scale[0]*(l.is_mirror?-1:1),l.scale[1]);ctx.globalAlpha=l.color[3];ctx.drawImage(im,-im.width/2,-im.height/2);ctx.restore();}ctx.restore();}
 function draw(){const c=$('character'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);render(ctx,zoom,400,295);$('direction').textContent=['South','Southwest','West','Northwest','North','Northeast','East','Southeast'][direction];$('zoom').value=zoom;$('zoom-label').value=zoom+'×';}
 function rotate(delta){direction=(direction+delta+8)%8;draw();}
 $('left').onclick=()=>rotate(-1);$('right').onclick=()=>rotate(1);let wheelAt=0;$('stage').addEventListener('wheel',e=>{e.preventDefault();if(Date.now()-wheelAt<110)return;wheelAt=Date.now();rotate(e.deltaY>0?1:-1);},{passive:false});$('stage').onkeydown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();rotate(e.key==='ArrowLeft'?-1:1);}};
 const setZoom=z=>{zoom=Math.max(1,Math.min(8,Math.round(z*4)/4));draw();};$('zoom').oninput=e=>setZoom(Number(e.target.value));$('plus').onclick=()=>setZoom(zoom+.5);$('minus').onclick=()=>setZoom(zoom-.5);$('reset').onclick=()=>{resetDisplay();state={...initial};populateEquipment();direction=0;zoom=3;sync();load();};$('export').onclick=()=>{if(!current)return;const c=document.createElement('canvas');c.width=800;c.height=640;render(c.getContext('2d'),zoom,400,320);c.toBlob(blob=>{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='nusantara-look-'+state.job+'-'+state.hair+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});};sync();load();
 
-initDisplay(draw);let lastAuraFrame=0;function animateAura(t){if(auraActive()&&t-lastAuraFrame>16&&!document.hidden){draw();lastAuraFrame=t;}requestAnimationFrame(animateAura);}requestAnimationFrame(animateAura);
+initDisplay(draw);let lastAuraFrame=0;function animateAura(t){if((auraActive()||(!reducedMotion.matches&&current&&[...current.hats,current.robe].some(p=>p?.animated&&p.act.actions[direction%p.act.actions.length]?.animations.length>1)))&&t-lastAuraFrame>16&&!document.hidden){draw();lastAuraFrame=t;}requestAnimationFrame(animateAura);}requestAnimationFrame(animateAura);reducedMotion.addEventListener('change',draw);
 
 let swipe=null;
 const touches=new Set();

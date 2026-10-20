@@ -10,9 +10,11 @@ Backgrounds are Light or Dark. PNG export stays transparent. Display settings an
 
 ## Niktout catalogue
 
-Character sprites, palettes, equipment, and aura textures load on demand from https://classicweb.niktoutro.com/client/. The item catalogue is generated from Niktout's public client bundle, accessory mappings, item display names, and descriptions. It currently contains 933 entries (852 regular headgear, 81 costumes), using actual item IDs and documented upper/middle/lower slots. Costume items override ordinary items in overlapping slots; conflicting items within the same category are cleared.
+Character sprites, palettes, equipment, and aura textures load on demand from https://classicweb.niktoutro.com/client/. The item catalogue is generated from Niktout's public client bundle, accessory mappings, item display names, and descriptions. It currently contains 935 entries (852 regular headgear, 83 costumes), using actual item IDs and documented upper/middle/lower slots. Costume items override ordinary items in overlapping slots; conflicting items within the same category are cleared.
 
 This reflects the public client catalogue, not the server's private item database, shops, or obtainable-item list. Entries without a confirmed visual mapping and slot are omitted. The back/garment slot includes Costume Poring Bag (20507, robe 16) and Costume Adventurer's Backpack (20512, robe 2). These two views are absent from Niktout's bundled item table; they were cross-checked against [rAthena item definitions](https://github.com/rathena/rathena/blob/master/db/re/item_db_equip.yml), Niktout's named robe IDs, item descriptions and served SPR/ACT assets. Other garment mappings remain unverified. Item class/job/level restrictions are not enforced by this appearance tool. Missing assets are reported and disable PNG export.
+
+Costume Book of Magic (31395, lower slot, view 1691) and Costume Floating Ball (31568, middle slot, view 1760) are supplemented from rAthena definitions and verified against Niktout descriptions, HatTable paths, icons, and male/female SPR/ACT assets. Both have 24 standing animation frames per direction. Costume sprites use their original ACT frame timing; the character anchor remains stable during animation. Reduced-motion mode freezes costume animation, and hidden pages stop drawing.
 
 To refresh the catalogue, run npm run update:catalogue. The generator downloads only public client data into ignored .cache files and writes niktout-items.js.
 
