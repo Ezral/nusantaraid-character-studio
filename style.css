@@ -6,7 +6,7 @@
 
 img.map-scene{object-fit:cover;object-position:center}
 
-.stage.dark-background{background:#171d24}.dark-background .orbit{border-color:#364452}.dark-background .direction{color:#d0dce5}.dark-background .direction button{color:#e0eaf3;background:#263340;border-color:#465564}.dark-background:before,.dark-background:after{display:none}
+.stage.dark-background{background:radial-gradient(ellipse at 50% 40%,#3b3b3b 0%,#202020 48%,#000 100%)}.dark-background .orbit{border-color:#364452}.dark-background .direction{color:#d0dce5}.dark-background .direction button{color:#e0eaf3;background:#263340;border-color:#465564}.dark-background:before,.dark-background:after{display:none}
 
 [hidden]{display:none!important}.stage{touch-action:pan-y pinch-zoom}.controls label{min-width:0}select{max-width:100%;text-overflow:ellipsis}.equipment summary{min-height:44px;display:flex;align-items:center}.aura-toggle{min-height:44px}.aura-toggle input{width:20px;height:20px}.direction button,.zoom button{min-width:44px;min-height:44px}button:disabled{cursor:default}
 @media(max-width:760px), (pointer:coarse) and (max-width:1100px){header{height:64px;padding:0 14px;gap:10px}.brand{font-size:15px}.brand-icon{font-size:18px;margin-right:7px;padding:3px 10px}.tag{max-width:95px;line-height:1.5;font-size:7px;letter-spacing:1px}main{padding:12px 10px 24px}.workspace{gap:12px}.preview{position:sticky;top:6px;z-index:5;border-radius:14px;box-shadow:0 4px 18px #0002}.preview-top{padding:10px 14px;min-height:38px}.stage{height:240px}.preview-bottom{padding:6px 10px;min-height:60px;justify-content:center}.preview-bottom>span{display:none}.zoom{width:100%;justify-content:center;gap:12px}.zoom input{width:min(130px,35vw);min-height:44px}.direction{bottom:6px;gap:10px}.direction button{padding:4px 10px}.controls{padding:16px;gap:4px 12px;border-radius:14px}.controls label{font-size:11px}.controls select,.equipment input{font-size:16px;min-height:46px;padding:10px 8px}.equipment-grid{grid-template-columns:1fr}.display-controls{display:grid;grid-template-columns:1fr 1fr;align-items:end;gap:12px}.aura-toggle{font-size:12px!important;margin-bottom:0;min-height:46px}.primary,.reset{min-height:46px;font-size:13px}.panel-heading{margin-bottom:0}.equipment{margin-top:12px}.equipment summary{font-size:13px}}
@@ -41,3 +41,5 @@ img.map-scene{object-fit:cover;object-position:center}
 /* Let an overscroll at the top of the controls reach native pull-to-refresh. */
 html{overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:auto}body{overflow:visible;overscroll-behavior-y:auto}.controls{overscroll-behavior-y:auto}
 }
+
+.direction{gap:8px}
