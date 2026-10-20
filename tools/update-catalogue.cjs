@@ -16,7 +16,7 @@ const robes={};for(const m of bundle.slice(robeStart,robeEnd).matchAll(/(\d+):\s
 // Garment views absent from the client item table: cross-checked against
 // rAthena db/re/item_db_equip.yml and Niktout SPRITE_ROBE_IDs + served SPR/ACT assets.
 // Magic book and floating ball: views from rAthena; HatTable paths and SPR/ACT verified on Niktout.
-const verifiedViews={20507:16,20512:2,31395:1691,31568:1760};
+const verifiedViews={20507:16,20512:2,20591:68,31395:1691,31568:1760};
 names[31568] ||= 'Costume Floating Ball';hats[1691] ||= '_Book_Of_Magic';hats[1760] ||= '_Floating_Ball';
 const items=[];
 for(const [id,name] of Object.entries(names)){

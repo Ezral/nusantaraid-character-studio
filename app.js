@@ -1,6 +1,6 @@
-import {initMobileControls} from './mobile-controls.js?v=20261020-costumes15';
-import {initDisplay,drawAura,auraActive,resetDisplay} from './display.js?v=20261020-costumes15';
-import Catalogue from './niktout-items.js?v=20261020-costumes15';
+import {initMobileControls} from './mobile-controls.js?v=20261020-bow16';
+import {initDisplay,drawAura,auraActive,resetDisplay} from './display.js?v=20261020-bow16';
+import Catalogue from './niktout-items.js?v=20261020-bow16';
 const Hats=Catalogue.hats,Robes=Catalogue.robes,itemsById=new Map(Catalogue.items.map(item=>[item.id,item]));
 import SPR from './vendor/Sprite.js';
 import ACT from './vendor/Action.js';

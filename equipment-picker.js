@@ -1,4 +1,4 @@
-import {itemThumbnail} from './item-thumbnails.js?v=20261020-costumes15';
+import {itemThumbnail} from './item-thumbnails.js?v=20261020-bow16';
 export function initEquipmentPicker(){
  const drawer=document.createElement('section');drawer.id='equipment-drawer';drawer.className='equipment-drawer';drawer.hidden=true;drawer.setAttribute('role','dialog');drawer.setAttribute('aria-labelledby','equipment-drawer-title');
  drawer.innerHTML='<div class="drawer-heading"><strong id="equipment-drawer-title"></strong><button type="button" class="drawer-close" aria-label="Close equipment picker">×</button></div><input class="drawer-filter" type="search" placeholder="Filter by name or item ID…" aria-label="Filter equipment" autocomplete="off"><div class="drawer-count" role="status"></div><div class="drawer-list" aria-label="Equipment choices"></div>';

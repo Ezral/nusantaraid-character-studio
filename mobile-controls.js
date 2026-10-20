@@ -1,4 +1,4 @@
-import {initEquipmentPicker} from './equipment-picker.js?v=20261020-costumes15';
+import {initEquipmentPicker} from './equipment-picker.js?v=20261020-bow16';
 // Mobile controls use the same select/change events as the desktop UI.
 export function initMobileControls(){
  const mobile=matchMedia('(max-width:760px), (pointer:coarse) and (max-width:1100px)'),wheels=[],pickers=[];

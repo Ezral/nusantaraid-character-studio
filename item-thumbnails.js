@@ -1,4 +1,4 @@
-import icons from './item-icons.js?v=20261020-costumes15';
+import icons from './item-icons.js?v=20261020-bow16';
 const cache=new Map();
 async function loadIcon(name){
  if(!cache.has(name))cache.set(name,(async()=>{
