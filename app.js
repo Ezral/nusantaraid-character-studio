@@ -1,6 +1,6 @@
-import {initMobileControls} from './mobile-controls.js?v=20261020-tabs13';
-import {initDisplay,drawAura,auraActive,resetDisplay} from './display.js?v=20261020-tabs13';
-import Catalogue from './niktout-items.js';
+import {initMobileControls} from './mobile-controls.js?v=20261020-picker14';
+import {initDisplay,drawAura,auraActive,resetDisplay} from './display.js?v=20261020-picker14';
+import Catalogue from './niktout-items.js?v=20261020-picker14';
 const Hats=Catalogue.hats,Robes=Catalogue.robes,itemsById=new Map(Catalogue.items.map(item=>[item.id,item]));
 import SPR from './vendor/Sprite.js';
 import ACT from './vendor/Action.js';
@@ -24,7 +24,8 @@ populateEquipment();for(const key of equipment)if(!choicesFor(key).length)$(key)
 for(const key of fields){$(key).value=state[key];if($(key).selectedIndex<0)state[key]=initial[key],$(key).value=state[key];$(key).addEventListener('change',()=>{state[key]=Number($(key).value);if(equipment.includes(key))clearConflicts(key);if(key==='job'&&state.job===19)state.gender=1;if(key==='job'&&state.job===20)state.gender=0;if(key==='gender'&&state.job===19&&state.gender===0)state.job=20;if(key==='gender'&&state.job===20&&state.gender===1)state.job=19;sync();if(key==='hairColor'||key==='costumeColor')updatePalette(key);else load();});}
 function sync(){for(const key of fields)$(key).value=state[key];try{localStorage.setItem('nusantara-studio-items-v2',JSON.stringify(state));}catch{}document.dispatchEvent(new Event('studio-look-change'));}
 const cache=new Map();async function file(path){if(!cache.has(path)){const promise=fetch((path.startsWith('data/palette/')?'https://classicweb.niktoutro.com/client/':endpoint)+path.split('/').map(encodeURIComponent).join('/'),{signal:AbortSignal.timeout(20000)}).then(async r=>{if(!r.ok)throw Error('Asset not available');const data=await r.arrayBuffer();if(data.byteLength<4||r.headers.get('content-type')?.includes('text/html'))throw Error('Asset not available');return data;}).catch(e=>{cache.delete(path);throw e;});cache.set(path,promise);}return cache.get(path);}
-async function part(path){const [spr,act]=await Promise.all([file(path+'.spr'),file(path+'.act')]);return {spr:new SPR(spr),act:new ACT(act)};}
+const spriteCache=new Map();
+async function part(path){if(!spriteCache.has(path))spriteCache.set(path,Promise.all([file(path+'.spr'),file(path+'.act')]).then(([spr,act])=>({spr:new SPR(spr),act:new ACT(act)})).catch(error=>{spriteCache.delete(path);throw error;}));return {...await spriteCache.get(path)};}
 // Palette swaps retain loaded SPR/ACT data, equipment, pose and the last visible frame.
 async function readPalette(key,look){
  const color=look[key];if(!color)return {palette:null,warning:''};
@@ -35,24 +36,24 @@ async function readPalette(key,look){
 }
 function paletteStatus(){if(!current)return;const warnings=[...current.warnings,...Object.values(current.paletteWarnings)].filter(Boolean);$('status').textContent=warnings.join(' ');$('export').disabled=current.pendingPalettes.size>0||warnings.length>0;}
 async function updatePalette(key){
- if(!current)return load();
- const target=current,look={...state},version=(target.paletteVersions[key]||0)+1;
+ if(!current||fields.some(field=>field!=='hairColor'&&field!=='costumeColor'&&current.look[field]!==state[field]))return load();
+ const generation=revision,target=current,look={...state},version=(target.paletteVersions[key]||0)+1;
  target.paletteVersions[key]=version;target.pendingPalettes.add(key);paletteStatus();
  const result=await readPalette(key,look);
  // Ignore outdated colors and results belonging to an earlier character/job.
- if(current!==target||target.paletteVersions[key]!==version)return;
+ if(revision!==generation||current!==target||target.paletteVersions[key]!==version)return;
  const part=key==='hairColor'?target.hair:target.body;
  part.palette=result.palette;part.images.clear();target.look[key]=look[key];
  target.paletteWarnings[key]=result.warning;target.pendingPalettes.delete(key);paletteStatus();draw();
 }
-async function load(){const id=++revision;current=null;$('export').disabled=true;$('status').textContent='Loading your character…';draw();const look={...state};const sex=look.gender?'\xb3\xb2':'\xbf\xa9',head=Hair[look.gender][look.hair]||look.hair;const root='data/sprite/\xc0\xce\xb0\xa3\xc1\xb7/';try{const [body,hair]=await Promise.all([part(root+'\xb8\xf6\xc5\xeb/'+sex+'/'+Jobs[look.job]+'_'+sex),part(root+'\xb8\xd3\xb8\xae\xc5\xeb/'+sex+'/'+head+'_'+sex)]);const warnings=[],paletteWarnings={};for(const [key,p] of [['costumeColor',body],['hairColor',hair]]){const result=await readPalette(key,look);p.palette=result.palette;p.images=new Map();paletteWarnings[key]=result.warning;}
+async function load(){const id=++revision;$('export').disabled=true;if(!current)$('status').textContent='Loading your character…';draw();const look={...state};const sex=look.gender?'\xb3\xb2':'\xbf\xa9',head=Hair[look.gender][look.hair]||look.hair;const root='data/sprite/\xc0\xce\xb0\xa3\xc1\xb7/';try{const [body,hair]=await Promise.all([part(root+'\xb8\xf6\xc5\xeb/'+sex+'/'+Jobs[look.job]+'_'+sex),part(root+'\xb8\xd3\xb8\xae\xc5\xeb/'+sex+'/'+head+'_'+sex)]);const warnings=[],paletteWarnings={};for(const [key,p] of [['costumeColor',body],['hairColor',hair]]){const result=await readPalette(key,look);p.palette=result.palette;p.images=new Map();paletteWarnings[key]=result.warning;}
 const hats=[],seen=new Set();
 const selected=equipment.filter(key=>key!=='garment').map(key=>itemsById.get(look[key])).filter(Boolean);
 const covered=new Set(selected.filter(item=>item.costume).flatMap(item=>item.slots));
 const visible=selected.filter(item=>item.costume||!item.slots.some(slot=>covered.has(slot))).sort((a,b)=>Math.max(...a.slots.map(slot=>['middle','upper','lower'].indexOf(slot)))-Math.max(...b.slots.map(slot=>['middle','upper','lower'].indexOf(slot))));
 for(const item of visible){const visual=item.view;if(seen.has(visual))continue;seen.add(visual);try{const p=await part('data/sprite/\xbe\xc7\xbc\xbc\xbb\xe7\xb8\xae/'+sex+'/'+sex+Hats[visual]);p.images=new Map();hats.push(p);}catch{warnings.push(item.name+' unavailable for this look.');}}
 let robe=null;if(look.garment){const item=itemsById.get(look.garment),name=Robes[item.view],base='data/sprite/\xb7\xce\xba\xea/'+name+'/';try{try{robe=await part(base+sex+'/'+Jobs[look.job]+'_'+sex);}catch{robe=await part(base+name);}robe.images=new Map();}catch{warnings.push(item.name+' unavailable for this look.');}}
-if(id!==revision)return;current={body,hair,hats,robe,look,warnings,paletteWarnings,paletteVersions:{},pendingPalettes:new Set()};$('look-name').textContent=jobs.find(j=>j[0]===look.job)[1]+' · '+(look.gender?'Male':'Female');paletteStatus();draw();}catch(e){if(id===revision){$('status').textContent='This look could not load. Try another style or check your connection.';current=null;draw();}}}
+if(id!==revision)return;current={body,hair,hats,robe,look,warnings,paletteWarnings,paletteVersions:{},pendingPalettes:new Set()};$('look-name').textContent=jobs.find(j=>j[0]===look.job)[1]+' · '+(look.gender?'Male':'Female');paletteStatus();draw();}catch(e){if(id===revision){$('status').textContent=current?'This look could not load; keeping the previous look.':'This look could not load. Try another style or check your connection.';$('export').disabled=true;draw();}}}
 function frameImage(part,index){if(part.images.has(index))return part.images.get(index);const f=part.spr.frames[index];if(!f||!f.width||!f.height)return null;const c=document.createElement('canvas');c.width=f.width;c.height=f.height;const ctx=c.getContext('2d'),image=ctx.createImageData(f.width,f.height),pal=part.palette||part.spr.palette;for(let y=0;y<f.height;y++)for(let x=0;x<f.width;x++){const i=y*f.width+x,j=i*4;if(f.type===0){const n=f.data[i];image.data[j]=pal[n*4];image.data[j+1]=pal[n*4+1];image.data[j+2]=pal[n*4+2];image.data[j+3]=n?255:0;}else{const k=((f.height-1-y)*f.width+x)*4;image.data[j]=f.data[k+3];image.data[j+1]=f.data[k+2];image.data[j+2]=f.data[k+1];image.data[j+3]=f.data[k];}}ctx.putImageData(image,0,0);part.images.set(index,c);return c;}
 function layers(){
  if(!current)return [];

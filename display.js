@@ -17,7 +17,7 @@ function applyTheme(){$('stage').classList.toggle('dark-background',theme==='dar
 async function applyAura(){
  if(effect||loading)return;
  $('display-status').textContent='Loading RO aura…';
- loading=import('./aura/aura.js?v=20261020-tabs13').then(m=>m.createAura()).then(value=>{effect=value;$('display-status').textContent='';refresh();}).catch(e=>{console.error(e);if(aura)$('display-status').textContent='RO aura unavailable. Turn it off and on to retry.';}).finally(()=>loading=null);
+ loading=import('./aura/aura.js?v=20261020-picker14').then(m=>m.createAura()).then(value=>{effect=value;$('display-status').textContent='';refresh();}).catch(e=>{console.error(e);if(aura)$('display-status').textContent='RO aura unavailable. Turn it off and on to retry.';}).finally(()=>loading=null);
 }
 export function drawAura(ctx,x,y,scale){if(aura&&effect&&opacity>0){ctx.save();ctx.globalAlpha*=opacity/100;ctx.translate(x,y);ctx.scale(size/100,size/100);effect.draw(ctx,0,0,scale,!reduced.matches);ctx.restore();}}
 export function auraActive(){return aura&&opacity>0&&!!effect&&!reduced.matches;}

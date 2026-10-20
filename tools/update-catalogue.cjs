@@ -13,9 +13,12 @@ function decode(s){return s.replace(/\\x([a-f0-9]{2})|\\(\d{1,3})|\\(.)/gi,(_,h,
 const hats={};for(const m of fs.readFileSync(root+'accname.lub','latin1').matchAll(/\[ACCESSORY_IDs\.(\w+)\]\s*=\s*"((?:\\.|[^"\\])*)"/g))if(ids[m[1]])hats[ids[m[1]]]=decode(m[2]);
 const robeStart=bundle.indexOf("define('DB/Items/RobeTable'"),robeEnd=bundle.indexOf('\n});',robeStart);
 const robes={};for(const m of bundle.slice(robeStart,robeEnd).matchAll(/(\d+):\s*'((?:\\.|[^'\\])*)'/g))robes[m[1]]=decode(m[2]);
+// Garment views absent from the client item table: cross-checked against
+// rAthena db/re/item_db_equip.yml and Niktout SPRITE_ROBE_IDs + served SPR/ACT assets.
+const garmentViews={20507:16,20512:2};
 const items=[];
 for(const [id,name] of Object.entries(names)){
- const d=desc[id]||'',v=view[id];if(!v)continue;
+ const d=desc[id]||'',v=view[id]||garmentViews[id];if(!v)continue;
  const position=d.match(/(?:Position|Location|Equipped on)\s*:\s*([^\r\n]+)/i)?.[1]||'';
  const slots=['upper','middle','lower'].filter(s=>new RegExp(s,'i').test(position));
  const costume=/Class\s*:\s*Costume/i.test(d)||/^Costume[_ ]/i.test(name);
