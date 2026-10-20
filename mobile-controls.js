@@ -1,6 +1,12 @@
 import {initEquipmentPicker} from './equipment-picker.js?v=20261020-bow16';
 // Mobile controls use the same select/change events as the desktop UI.
 export function initMobileControls(){
+ const editor=document.createElement('dialog');editor.className='number-editor';editor.setAttribute('aria-labelledby','number-editor-title');
+ editor.innerHTML='<form novalidate><strong id="number-editor-title"></strong><span id="number-editor-range"></span><input id="number-editor-input" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" aria-labelledby="number-editor-title" aria-describedby="number-editor-range number-editor-error"><span id="number-editor-error" role="alert"></span><div><button type="button" class="number-cancel">Cancel</button><button type="submit">Apply</button></div></form>';document.body.append(editor);
+ const input=editor.querySelector('input'),form=editor.querySelector('form');let applyNumber=null,returnFocus=null;
+ editor.querySelector('.number-cancel').onclick=()=>editor.close();editor.addEventListener('close',()=>{applyNumber=null;returnFocus?.focus({preventScroll:true});});
+ form.onsubmit=e=>{e.preventDefault();const raw=input.value.trim(),value=Number(raw);if(!/^\d+$/.test(raw)||!applyNumber?.(value)){editor.querySelector('#number-editor-error').textContent='Enter a number within the range shown.';input.focus();return;}editor.close();};
+ const editNumber=(select,button,apply)=>{returnFocus=button;const values=Array.from(select.options,o=>Number(o.value));editor.querySelector('strong').textContent=select.closest('label').firstChild.textContent.trim();editor.querySelector('#number-editor-range').textContent=values[0]+'–'+values.at(-1);editor.querySelector('#number-editor-error').textContent='';input.value=select.value;applyNumber=value=>{if(!values.includes(value))return false;apply(value);return true;};editor.showModal();input.focus();input.select();};
  const mobile=matchMedia('(max-width:760px), (pointer:coarse) and (max-width:1100px)'),wheels=[],pickers=[];
  for(const id of ['hair','hairColor','costumeColor']){
   const select=document.getElementById(id),label=select.closest('label');label.classList.add('palette-field');
@@ -8,18 +14,18 @@ export function initMobileControls(){
   const choices=Array.from(select.options),numeric=id.endsWith('Color');
   if(numeric)wheel.classList.add('numeric-wheel');
   const buttons=Array.from({length:3},(_,cycle)=>choices.map(option=>{const b=document.createElement('button');b.type='button';b.dataset.value=option.value;b.dataset.cycle=cycle;b.textContent=option.value.padStart(numeric?3:2,'0');b.classList.toggle('major-tick',Number(option.value)%5===0);b.setAttribute('aria-label',option.textContent);return b;})).flat();
-  wheel.append(...buttons);const ruler=document.createElement('div');ruler.className='ruler-shell';ruler.append(wheel);label.append(ruler);
+  wheel.append(...buttons);const ruler=document.createElement('div');ruler.className='ruler-shell';ruler.append(wheel);label.append(ruler);const hint=document.createElement('span');hint.className='ruler-edit-hint';hint.textContent='Tap center to type';label.append(hint);
   let timer,positioning=false,committing=false,active,userScrolling=false,lastPulse=-Infinity;
   const pulse=()=>{const now=performance.now();if(!userScrolling||!mobile.matches||document.hidden||now-lastPulse<50||typeof navigator.vibrate!=='function')return;lastPulse=now;try{navigator.vibrate(35);}catch{}};
   const selected=()=>buttons.find(b=>b.dataset.value===select.value&&b.dataset.cycle==='1');
-  const highlight=(b,haptic=false)=>{if(active===b)return;if(haptic&&b&&active?.dataset.value!==b.dataset.value)pulse();active?.setAttribute('aria-pressed','false');active=b;active?.setAttribute('aria-pressed','true');};
+  const highlight=(b,haptic=false)=>{if(active===b)return;if(haptic&&b&&active?.dataset.value!==b.dataset.value)pulse();active?.setAttribute('aria-pressed','false');if(active)active.title='';active=b;active?.setAttribute('aria-pressed','true');if(active)active.title='Tap to enter a number';};
   const nearest=()=>{const first=buttons[0].getBoundingClientRect(),step=buttons[1].getBoundingClientRect().left-first.left,rect=wheel.getBoundingClientRect();return buttons[Math.max(0,Math.min(buttons.length-1,Math.round((rect.left+rect.width/2-first.left-first.width/2)/step)))];};
   const position=()=>{if(!mobile.matches||committing||!wheel.clientWidth)return;clearTimeout(timer);const b=selected();if(!b)return;positioning=true;wheel.scrollLeft+=b.getBoundingClientRect().left+b.offsetWidth/2-wheel.getBoundingClientRect().left-wheel.clientWidth/2;highlight(b);requestAnimationFrame(()=>requestAnimationFrame(()=>positioning=false));};
   const choose=b=>{if(!b)return;committing=true;if(select.value!==b.dataset.value){select.value=b.dataset.value;select.dispatchEvent(new Event('change',{bubbles:true}));}committing=false;position();};
   const settle=()=>{if(!positioning){choose(nearest());userScrolling=false;}};
   wheel.addEventListener('pointerdown',()=>{userScrolling=true;},{passive:true});
   wheel.addEventListener('wheel',()=>{userScrolling=true;},{passive:true});
-  wheel.onclick=e=>{const b=e.target.closest('button');if(b){highlight(b);choose(b);}};
+  wheel.onclick=e=>{const b=e.target.closest('button');if(!b)return;e.preventDefault();const centered=b===active;highlight(b);choose(b);if(centered)editNumber(select,selected(),value=>choose(buttons.find(item=>item.dataset.value===String(value)&&item.dataset.cycle==='1')));};
   wheel.addEventListener('scroll',()=>{if(positioning)return;highlight(nearest(),true);clearTimeout(timer);timer=setTimeout(settle,90);},{passive:true});
   wheel.addEventListener('scrollend',()=>{clearTimeout(timer);settle();});
   wheel.onkeydown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();const i=buttons.indexOf(selected());choose(buttons[i+(e.key==='ArrowRight'?1:-1)]);}};

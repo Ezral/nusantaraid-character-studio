@@ -1,5 +1,5 @@
 import {mapSceneActive,updateMapScene} from './map-scene.js?v=20261020-world19';
-import {initMobileControls} from './mobile-controls.js?v=20261020-haptics18';
+import {initMobileControls} from './mobile-controls.js?v=20261020-number20';
 import {initDisplay,drawAura,auraActive,resetDisplay} from './display.js?v=20261020-world19';
 import Catalogue from './niktout-items.js?v=20261020-bow16';
 const Hats=Catalogue.hats,Robes=Catalogue.robes,itemsById=new Map(Catalogue.items.map(item=>[item.id,item]));

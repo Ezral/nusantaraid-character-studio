@@ -12,6 +12,7 @@
     "build:aura": "node build-aura.mjs",
     "update:catalogue": "node tools/update-catalogue.cjs",
     "build:scene": "node build-scene.mjs",
-    "test:scene": "node tests/world-scene.cjs"
+    "test:scene": "node tests/world-scene.cjs",
+    "test:number-editor": "node tests/number-editor.cjs"
   }
 }
