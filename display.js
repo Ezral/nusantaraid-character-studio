@@ -1,4 +1,4 @@
-import {setMapScene} from './map-scene.js?v=20261020-world19';
+import {setMapScene} from './map-scene.js?v=20261020-ground21';
 const $=id=>document.getElementById(id);
 let theme='light',aura=false,opacity=50,size=100,effect=null,loading=null,refresh=()=>{};
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
@@ -23,3 +23,5 @@ async function applyAura(){
 export function drawAura(ctx,x,y,scale){if(aura&&effect&&opacity>0){ctx.save();ctx.globalAlpha*=opacity/100;ctx.translate(x,y);ctx.scale(size/100,size/100);effect.draw(ctx,0,0,scale,!reduced.matches);ctx.restore();}}
 export function auraActive(){return aura&&opacity>0&&!!effect&&!reduced.matches;}
 export function resetDisplay(){theme='light';aura=false;opacity=50;size=100;syncAuraControls();$('background').value=theme;$('aura').checked=false;$('display-status').textContent='';applyTheme();save();}
+
+export function worldAuraSettings(){return {aura,opacity,size,animate:!reduced.matches};}

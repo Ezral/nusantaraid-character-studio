@@ -13,6 +13,7 @@
     "update:catalogue": "node tools/update-catalogue.cjs",
     "build:scene": "node build-scene.mjs",
     "test:scene": "node tests/world-scene.cjs",
-    "test:number-editor": "node tests/number-editor.cjs"
+    "test:number-editor": "node tests/number-editor.cjs",
+    "test:grounding": "node tests/grounding.cjs"
   }
 }
