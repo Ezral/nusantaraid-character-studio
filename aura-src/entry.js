@@ -22,8 +22,6 @@ export async function createAura(){
   // the caller applies the same ACT origin and zoom transform as the character.
   const unit=35*scale;mat4.ortho(projection,-400/unit,400/unit,-320/unit,320/unit,-100,100);
   mat4.identity(view);mat4.rotateX(view,view,235*Math.PI/180);
-  // Increase world-space height, retaining the ground footprint and foot anchor.
-  mat4.scale(view,view,[1,1.8,1]);
   const now=performance.now();
   const placement=[x,y,scale].join(',');
   if(!last||placement!==lastPlacement||(animate&&now-last>=1000/60)){
