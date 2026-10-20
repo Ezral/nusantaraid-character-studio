@@ -36,3 +36,8 @@ img.map-scene{object-fit:cover;object-position:center}
 }
 
 .aura-opacity{grid-column:1/-1}.aura-opacity output{float:right;font-family:ui-monospace,monospace}.aura-opacity input{display:block;width:100%;height:22px;margin:0;accent-color:#657b51}
+
+@media(max-width:760px), (pointer:coarse) and (max-width:1100px){
+/* Let an overscroll at the top of the controls reach native pull-to-refresh. */
+html{overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:auto}body{overflow:visible;overscroll-behavior-y:auto}.controls{overscroll-behavior-y:auto}
+}

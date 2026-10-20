@@ -1,5 +1,5 @@
-import {initMobileControls} from './mobile-controls.js?v=20261020-aura10';
-import {initDisplay,drawAura,auraActive,resetDisplay} from './display.js?v=20261020-aura10';
+import {initMobileControls} from './mobile-controls.js?v=20261020-aura11';
+import {initDisplay,drawAura,auraActive,resetDisplay} from './display.js?v=20261020-aura11';
 import Catalogue from './niktout-items.js';
 const Hats=Catalogue.hats,Robes=Catalogue.robes,itemsById=new Map(Catalogue.items.map(item=>[item.id,item]));
 import SPR from './vendor/Sprite.js';
@@ -11,7 +11,7 @@ const $=id=>document.getElementById(id), endpoint='https://classicweb.niktoutro.
 const jobs=[[0,'Novice'],[1,'Swordsman'],[2,'Mage'],[3,'Archer'],[4,'Acolyte'],[5,'Merchant'],[6,'Thief'],[7,'Knight'],[8,'Priest'],[9,'Wizard'],[10,'Blacksmith'],[11,'Hunter'],[12,'Assassin'],[14,'Crusader'],[15,'Monk'],[16,'Sage'],[17,'Rogue'],[18,'Alchemist'],[19,'Bard'],[20,'Dancer'],[23,'Super Novice']];
 const equipment=['upper','middle','lower','costumeUpper','costumeMiddle','costumeLower','garment'];
 const fields=['gender','job','hair','hairColor','costumeColor',...equipment];
-const initial={gender:1,job:3,hair:1,hairColor:0,costumeColor:0,...Object.fromEntries(equipment.map(k=>[k,0]))};let state={...initial},direction=0,zoom=4,current=null,revision=0;
+const initial={gender:1,job:3,hair:1,hairColor:0,costumeColor:0,...Object.fromEntries(equipment.map(k=>[k,0]))};let state={...initial},direction=0,zoom=3,current=null,revision=0;
 try{const saved=JSON.parse(localStorage.getItem('nusantara-studio-items-v2')||'null');if(saved)for(const key of fields)if(Number.isInteger(saved[key]))state[key]=saved[key];}catch{}
 const options=(id,rows)=>$(id).replaceChildren(...rows.map(([value,label])=>new Option(label,value)));
 options('job',jobs);options('hair',Array.from({length:30},(_,i)=>[i+1,'Style '+String(i+1).padStart(2,'0')]));options('hairColor',Array.from({length:264},(_,i)=>[i,i?'Palette '+i:'Original color']));options('costumeColor',Array.from({length:700},(_,i)=>[i,i?'Palette '+i:'Original color']));
@@ -69,7 +69,7 @@ ctx.save();ctx.translate(cx,cy);ctx.scale(scale,scale);ctx.translate(-(minX+maxX
 function draw(){const c=$('character'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);render(ctx,zoom,400,295);$('direction').textContent=['South','Southwest','West','Northwest','North','Northeast','East','Southeast'][direction];$('zoom').value=zoom;$('zoom-label').value=zoom+'×';}
 function rotate(delta){direction=(direction+delta+8)%8;draw();}
 $('left').onclick=()=>rotate(-1);$('right').onclick=()=>rotate(1);let wheelAt=0;$('stage').addEventListener('wheel',e=>{e.preventDefault();if(Date.now()-wheelAt<110)return;wheelAt=Date.now();rotate(e.deltaY>0?1:-1);},{passive:false});$('stage').onkeydown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();rotate(e.key==='ArrowLeft'?-1:1);}};
-const setZoom=z=>{zoom=Math.max(1,Math.min(8,Math.round(z*4)/4));draw();};$('zoom').oninput=e=>setZoom(Number(e.target.value));$('plus').onclick=()=>setZoom(zoom+.5);$('minus').onclick=()=>setZoom(zoom-.5);$('reset').onclick=()=>{resetDisplay();state={...initial};populateEquipment();direction=0;zoom=4;sync();load();};$('export').onclick=()=>{if(!current)return;const c=document.createElement('canvas');c.width=800;c.height=640;render(c.getContext('2d'),zoom,400,320);c.toBlob(blob=>{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='nusantara-look-'+state.job+'-'+state.hair+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});};sync();load();
+const setZoom=z=>{zoom=Math.max(1,Math.min(8,Math.round(z*4)/4));draw();};$('zoom').oninput=e=>setZoom(Number(e.target.value));$('plus').onclick=()=>setZoom(zoom+.5);$('minus').onclick=()=>setZoom(zoom-.5);$('reset').onclick=()=>{resetDisplay();state={...initial};populateEquipment();direction=0;zoom=3;sync();load();};$('export').onclick=()=>{if(!current)return;const c=document.createElement('canvas');c.width=800;c.height=640;render(c.getContext('2d'),zoom,400,320);c.toBlob(blob=>{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='nusantara-look-'+state.job+'-'+state.hair+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});};sync();load();
 
 initDisplay(draw);let lastAuraFrame=0;function animateAura(t){if(auraActive()&&t-lastAuraFrame>16&&!document.hidden){draw();lastAuraFrame=t;}requestAnimationFrame(animateAura);}requestAnimationFrame(animateAura);
 
