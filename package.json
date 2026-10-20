@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "bson": "^7.3.3",
+    "granny-ro-js": "^1.5.0",
+    "lodash": "^4.18.1",
+    "lodash-es": "^4.18.1",
+    "rijndael-js": "^2.0.0",
+    "vite": "^6.4.4"
+  }
+}
