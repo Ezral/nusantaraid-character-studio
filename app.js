@@ -1,5 +1,5 @@
-import {initMobileControls} from './mobile-controls.js?v=20261020-display12';
-import {initDisplay,drawAura,auraActive,resetDisplay} from './display.js?v=20261020-display12';
+import {initMobileControls} from './mobile-controls.js?v=20261020-tabs13';
+import {initDisplay,drawAura,auraActive,resetDisplay} from './display.js?v=20261020-tabs13';
 import Catalogue from './niktout-items.js';
 const Hats=Catalogue.hats,Robes=Catalogue.robes,itemsById=new Map(Catalogue.items.map(item=>[item.id,item]));
 import SPR from './vendor/Sprite.js';

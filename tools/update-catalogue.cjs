@@ -2,7 +2,7 @@ const fs=require('fs'),path=require('path');
 const repo=path.resolve(__dirname,'..');
 (async()=>{
 const dir=path.join(repo,'.cache/niktout');fs.mkdirSync(dir,{recursive:true});
-for(const file of ['Online.js','data/idnum2itemdisplaynametable.txt','data/idnum2itemdesctable.txt','data/luafiles514/lua files/datainfo/accessoryid.lub','data/luafiles514/lua files/datainfo/accname.lub']){const url='https://classicweb.niktoutro.com/'+(file==='Online.js'?'':'client/')+file.split('/').map(encodeURIComponent).join('/');const response=await fetch(url,{signal:AbortSignal.timeout(30000)});if(!response.ok)throw Error('Could not read '+file);fs.writeFileSync(path.join(dir,path.basename(file)),Buffer.from(await response.arrayBuffer()));}
+for(const file of ['Online.js','data/idnum2itemdisplaynametable.txt','data/idnum2itemdesctable.txt','data/idnum2itemresnametable.txt','data/luafiles514/lua files/datainfo/accessoryid.lub','data/luafiles514/lua files/datainfo/accname.lub']){const url='https://classicweb.niktoutro.com/'+(file==='Online.js'?'':'client/')+file.split('/').map(encodeURIComponent).join('/');const response=await fetch(url,{signal:AbortSignal.timeout(30000)});if(!response.ok)throw Error('Could not read '+file);fs.writeFileSync(path.join(dir,path.basename(file)),Buffer.from(await response.arrayBuffer()));}
 
 const root=dir+path.sep,bundle=fs.readFileSync(root+'Online.js','utf8');
 function pairs(file){const text=fs.readFileSync(root+file,'latin1').split('idnum2itemresnametable')[0].replace(/\/\/[^\r\n]*/g,'');const result={};for(const m of text.matchAll(/(?:^|\r?\n)(\d+)#([\s\S]*?)#/g))result[m[1]]=m[2].replace(/\^[0-9a-f]{6}/gi,'').trim();return result;}
@@ -23,6 +23,8 @@ for(const [id,name] of Object.entries(names)){
  if(garment&&robes[v])items.push({id:Number(id),name:name.replaceAll('_',' '),view:v,costume:true,slots:['garment']});
  else if(slots.length&&hats[v]&&(/Class\s*:\s*(?:Headgear|Costume)/i.test(d)||costume))items.push({id:Number(id),name:name.replaceAll('_',' '),view:v,costume,slots});
 }
+const resources=pairs('idnum2itemresnametable.txt'),icons={};for(const item of items)if(resources[item.id])icons[item.id]=resources[item.id];
+fs.writeFileSync(path.join(repo,'item-icons.js'),'// Niktout identified item icon resources, keyed by item ID.\nexport default '+JSON.stringify(icons)+';\n');
 const out={source:'https://classicweb.niktoutro.com/',date:new Date().toISOString().slice(0,10),items,hats,robes};
 fs.writeFileSync(path.join(repo,'niktout-items.js'),'// Generated from Niktout Classic public client tables. Item IDs, not view IDs.\nexport default '+JSON.stringify(out)+';\n');
 console.log({items:items.length,headgear:items.filter(i=>!i.costume).length,costume:items.filter(i=>i.costume).length,hats:Object.keys(hats).length,robes:Object.keys(robes).length,sample:items.slice(0,5)});
