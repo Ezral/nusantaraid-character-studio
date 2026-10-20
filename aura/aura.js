@@ -3200,6 +3200,7 @@ async function createAura() {
     mat4.ortho(projection, -400 / unit, 400 / unit, -320 / unit, 320 / unit, -100, 100);
     mat4.identity(view);
     mat4.rotateX(view, view, 235 * Math.PI / 180);
+    mat4.scale(view, view, [1, 1.8, 1]);
     const now = performance.now();
     const placement = [x, y, scale].join(",");
     if (!last || placement !== lastPlacement || animate && now - last >= 1e3 / 60) {
