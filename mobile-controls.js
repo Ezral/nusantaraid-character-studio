@@ -6,8 +6,8 @@ export function initMobileControls(){
   const wheel=document.createElement('div');wheel.className='palette-wheel';wheel.setAttribute('role','group');wheel.setAttribute('aria-label',label.firstChild.textContent.trim());
   const choices=Array.from(select.options),numeric=id.endsWith('Color');
   if(numeric)wheel.classList.add('numeric-wheel');
-  const buttons=Array.from({length:3},(_,cycle)=>choices.map(option=>{const b=document.createElement('button');b.type='button';b.dataset.value=option.value;b.dataset.cycle=cycle;b.textContent=numeric?option.value.padStart(3,'0'):option.textContent;b.setAttribute('aria-label',option.textContent);return b;})).flat();
-  wheel.append(...buttons);label.append(wheel);
+  const buttons=Array.from({length:3},(_,cycle)=>choices.map(option=>{const b=document.createElement('button');b.type='button';b.dataset.value=option.value;b.dataset.cycle=cycle;b.textContent=option.value.padStart(numeric?3:2,'0');b.classList.toggle('major-tick',Number(option.value)%5===0);b.setAttribute('aria-label',option.textContent);return b;})).flat();
+  wheel.append(...buttons);const ruler=document.createElement('div');ruler.className='ruler-shell';ruler.append(wheel);label.append(ruler);
   let timer,positioning=false,committing=false,active;
   const selected=()=>buttons.find(b=>b.dataset.value===select.value&&b.dataset.cycle==='1');
   const highlight=b=>{if(active===b)return;active?.setAttribute('aria-pressed','false');active=b;active?.setAttribute('aria-pressed','true');};
