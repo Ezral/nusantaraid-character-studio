@@ -1,5 +1,5 @@
-import {initMobileControls} from './mobile-controls.js?v=20261020-mobile4';
-import {initDisplay,drawAura,auraActive,resetDisplay} from './display.js?v=20261020-mobile4';
+import {initMobileControls} from './mobile-controls.js?v=20261020-mobile5';
+import {initDisplay,drawAura,auraActive,resetDisplay} from './display.js?v=20261020-mobile5';
 import Catalogue from './niktout-items.js';
 const Hats=Catalogue.hats,Robes=Catalogue.robes,itemsById=new Map(Catalogue.items.map(item=>[item.id,item]));
 import SPR from './vendor/Sprite.js';
@@ -45,7 +45,7 @@ function layers(){
  return parts.flatMap(([part,a,ox,oy])=>a.layers.filter(l=>l.index>=0).map(l=>({part,l,x:l.pos[0]+ox,y:l.pos[1]+oy})));
 }
 function render(ctx,scale,cx,cy){const list=layers();if(!list.length)return;let minY=Infinity,maxY=-Infinity,minX=Infinity,maxX=-Infinity;for(const row of list){const im=frameImage(row.part,row.l.index+(row.l.spr_type?row.part.spr.rgba_index:0));if(!im)continue;row.im=im;minY=Math.min(minY,row.y-im.height*Math.abs(row.l.scale[1])/2);maxY=Math.max(maxY,row.y+im.height*Math.abs(row.l.scale[1])/2);minX=Math.min(minX,row.x-im.width*Math.abs(row.l.scale[0])/2);maxX=Math.max(maxX,row.x+im.width*Math.abs(row.l.scale[0])/2);}
-ctx.save();ctx.translate(cx,cy);ctx.scale(scale,scale);ctx.translate(-(minX+maxX)/2,-(minY+maxY)/2);drawAura(ctx,0,0,1);ctx.imageSmoothingEnabled=false;for(const {im,l,x,y} of list){if(!im)continue;ctx.save();ctx.translate(x,y);ctx.rotate(l.angle*Math.PI/180);ctx.scale(l.scale[0]*(l.is_mirror?-1:1),l.scale[1]);ctx.globalAlpha=l.color[3];ctx.drawImage(im,-im.width/2,-im.height/2);ctx.restore();}ctx.restore();}
+ctx.save();ctx.translate(cx,cy);ctx.scale(scale,scale);ctx.translate(-(minX+maxX)/2,-(minY+maxY)/2);ctx.save();ctx.scale(.55,.55);drawAura(ctx,0,0,1);ctx.restore();ctx.imageSmoothingEnabled=false;for(const {im,l,x,y} of list){if(!im)continue;ctx.save();ctx.translate(x,y);ctx.rotate(l.angle*Math.PI/180);ctx.scale(l.scale[0]*(l.is_mirror?-1:1),l.scale[1]);ctx.globalAlpha=l.color[3];ctx.drawImage(im,-im.width/2,-im.height/2);ctx.restore();}ctx.restore();}
 function draw(){const c=$('character'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);render(ctx,zoom,400,295);$('direction').textContent=['South','Southwest','West','Northwest','North','Northeast','East','Southeast'][direction];$('zoom').value=zoom;$('zoom-label').value=zoom+'×';}
 function rotate(delta){direction=(direction+delta+8)%8;draw();}
 $('left').onclick=()=>rotate(-1);$('right').onclick=()=>rotate(1);let wheelAt=0;$('stage').addEventListener('wheel',e=>{e.preventDefault();if(Date.now()-wheelAt<110)return;wheelAt=Date.now();rotate(e.deltaY>0?1:-1);},{passive:false});$('stage').onkeydown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();rotate(e.key==='ArrowLeft'?-1:1);}};

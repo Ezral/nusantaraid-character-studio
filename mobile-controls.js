@@ -1,21 +1,25 @@
 // Mobile controls use the same select/change events as the desktop UI.
 export function initMobileControls(){
- const mobile=matchMedia('(max-width:760px)'),wheels=[],pickers=[];
- for(const id of ['gender','job','hair','hairColor','costumeColor']){
-  const select=document.getElementById(id),label=select.closest('label');
-  label.classList.add('palette-field');
+ const mobile=matchMedia('(max-width:760px), (pointer:coarse) and (max-width:1100px)'),wheels=[],pickers=[];
+ for(const id of ['hair','hairColor','costumeColor']){
+  const select=document.getElementById(id),label=select.closest('label');label.classList.add('palette-field');
   const wheel=document.createElement('div');wheel.className='palette-wheel';wheel.setAttribute('role','group');wheel.setAttribute('aria-label',label.firstChild.textContent.trim());
-  const choices=Array.from(select.options);const buttons=Array.from({length:3},(_,cycle)=>choices.map(option=>{const b=document.createElement('button');b.type='button';b.dataset.value=option.value;b.dataset.cycle=cycle;b.textContent=id.endsWith('Color')?option.value:option.textContent;b.setAttribute('aria-label',option.textContent);return b;})).flat();
+  const choices=Array.from(select.options),numeric=id.endsWith('Color');
+  if(numeric)wheel.classList.add('numeric-wheel');
+  const buttons=Array.from({length:3},(_,cycle)=>choices.map(option=>{const b=document.createElement('button');b.type='button';b.dataset.value=option.value;b.dataset.cycle=cycle;b.textContent=numeric?option.value.padStart(3,'0'):option.textContent;b.setAttribute('aria-label',option.textContent);return b;})).flat();
   wheel.append(...buttons);label.append(wheel);
-  let timer,programmatic=false;
+  let timer,positioning=false,committing=false,active;
   const selected=()=>buttons.find(b=>b.dataset.value===select.value&&b.dataset.cycle==='1');
-  const position=()=>{if(!mobile.matches)return;const b=selected();if(!b)return;programmatic=true;wheel.scrollLeft+=b.getBoundingClientRect().left+b.offsetWidth/2-wheel.getBoundingClientRect().left-wheel.clientWidth/2;clearTimeout(timer);timer=setTimeout(()=>programmatic=false,200);};
-  const mark=()=>buttons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.value===select.value&&b.dataset.cycle==='1')));
-  const choose=value=>{if(select.value!==value){select.value=value;select.dispatchEvent(new Event('change',{bubbles:true}));}mark();};
-  wheel.onclick=e=>{const b=e.target.closest('button');if(b){choose(b.dataset.value);position();}};
-  wheel.addEventListener('scroll',()=>{if(programmatic)return;clearTimeout(timer);timer=setTimeout(()=>{const rect=wheel.getBoundingClientRect(),center=rect.left+rect.width/2;let closest=buttons[0],distance=Infinity;for(const b of buttons){const r=b.getBoundingClientRect(),d=Math.abs(r.left+r.width/2-center);if(d<distance){distance=d;closest=b;}}choose(closest.dataset.value);position();},170);},{passive:true});
-  wheel.onkeydown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();const i=buttons.indexOf(selected()),b=buttons[Math.max(0,Math.min(buttons.length-1,i+(e.key==='ArrowRight'?1:-1)))];choose(b.dataset.value);position();b.focus({preventScroll:true});}};
-  wheels.push({mark,position});mark();requestAnimationFrame(position);
+  const highlight=b=>{if(active===b)return;active?.setAttribute('aria-pressed','false');active=b;active?.setAttribute('aria-pressed','true');};
+  const nearest=()=>{const first=buttons[0].getBoundingClientRect(),step=buttons[1].getBoundingClientRect().left-first.left,rect=wheel.getBoundingClientRect();return buttons[Math.max(0,Math.min(buttons.length-1,Math.round((rect.left+rect.width/2-first.left-first.width/2)/step)))];};
+  const position=()=>{if(!mobile.matches||committing)return;clearTimeout(timer);const b=selected();if(!b)return;positioning=true;wheel.scrollLeft+=b.getBoundingClientRect().left+b.offsetWidth/2-wheel.getBoundingClientRect().left-wheel.clientWidth/2;highlight(b);requestAnimationFrame(()=>requestAnimationFrame(()=>positioning=false));};
+  const choose=b=>{if(!b)return;committing=true;if(select.value!==b.dataset.value){select.value=b.dataset.value;select.dispatchEvent(new Event('change',{bubbles:true}));}committing=false;position();};
+  const settle=()=>{if(!positioning)choose(nearest());};
+  wheel.onclick=e=>{const b=e.target.closest('button');if(b){highlight(b);choose(b);}};
+  wheel.addEventListener('scroll',()=>{if(positioning)return;highlight(nearest());clearTimeout(timer);timer=setTimeout(settle,90);},{passive:true});
+  wheel.addEventListener('scrollend',()=>{clearTimeout(timer);settle();});
+  wheel.onkeydown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();const i=buttons.indexOf(selected());choose(buttons[i+(e.key==='ArrowRight'?1:-1)]);}};
+  wheels.push({mark:()=>{if(!committing)highlight(selected());},position});highlight(selected());requestAnimationFrame(position);
  }
  for(const id of ['upper','middle','lower','costumeUpper','costumeMiddle','costumeLower','garment']){
   const select=document.getElementById(id),label=select.closest('label');
