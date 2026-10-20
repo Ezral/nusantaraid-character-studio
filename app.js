@@ -1,5 +1,5 @@
-import {initMobileControls} from './mobile-controls.js?v=20261020-mobile5';
-import {initDisplay,drawAura,auraActive,resetDisplay} from './display.js?v=20261020-mobile5';
+import {initMobileControls} from './mobile-controls.js?v=20261020-mobile6';
+import {initDisplay,drawAura,auraActive,resetDisplay} from './display.js?v=20261020-mobile6';
 import Catalogue from './niktout-items.js';
 const Hats=Catalogue.hats,Robes=Catalogue.robes,itemsById=new Map(Catalogue.items.map(item=>[item.id,item]));
 import SPR from './vendor/Sprite.js';
@@ -49,13 +49,25 @@ ctx.save();ctx.translate(cx,cy);ctx.scale(scale,scale);ctx.translate(-(minX+maxX
 function draw(){const c=$('character'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);render(ctx,zoom,400,295);$('direction').textContent=['South','Southwest','West','Northwest','North','Northeast','East','Southeast'][direction];$('zoom').value=zoom;$('zoom-label').value=zoom+'×';}
 function rotate(delta){direction=(direction+delta+8)%8;draw();}
 $('left').onclick=()=>rotate(-1);$('right').onclick=()=>rotate(1);let wheelAt=0;$('stage').addEventListener('wheel',e=>{e.preventDefault();if(Date.now()-wheelAt<110)return;wheelAt=Date.now();rotate(e.deltaY>0?1:-1);},{passive:false});$('stage').onkeydown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();rotate(e.key==='ArrowLeft'?-1:1);}};
-const setZoom=z=>{zoom=Math.max(1,Math.min(8,z));draw();};$('zoom').oninput=e=>setZoom(Number(e.target.value));$('plus').onclick=()=>setZoom(zoom+.5);$('minus').onclick=()=>setZoom(zoom-.5);$('reset').onclick=()=>{resetDisplay();state={...initial};populateEquipment();direction=0;zoom=4;sync();load();};$('export').onclick=()=>{if(!current)return;const c=document.createElement('canvas');c.width=800;c.height=640;render(c.getContext('2d'),zoom,400,320);c.toBlob(blob=>{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='nusantara-look-'+state.job+'-'+state.hair+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});};sync();load();
+const setZoom=z=>{zoom=Math.max(1,Math.min(8,Math.round(z*4)/4));draw();};$('zoom').oninput=e=>setZoom(Number(e.target.value));$('plus').onclick=()=>setZoom(zoom+.5);$('minus').onclick=()=>setZoom(zoom-.5);$('reset').onclick=()=>{resetDisplay();state={...initial};populateEquipment();direction=0;zoom=4;sync();load();};$('export').onclick=()=>{if(!current)return;const c=document.createElement('canvas');c.width=800;c.height=640;render(c.getContext('2d'),zoom,400,320);c.toBlob(blob=>{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='nusantara-look-'+state.job+'-'+state.hair+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});};sync();load();
 
 initDisplay(draw);let lastAuraFrame=0;function animateAura(t){if(auraActive()&&t-lastAuraFrame>16&&!document.hidden){draw();lastAuraFrame=t;}requestAnimationFrame(animateAura);}requestAnimationFrame(animateAura);
 
 let swipe=null;
-$('stage').addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'||e.target.closest('button'))return;swipe={id:e.pointerId,x:e.clientX,y:e.clientY};});
-$('stage').addEventListener('pointermove',e=>{if(!swipe||swipe.id!==e.pointerId)return;const dx=e.clientX-swipe.x,dy=e.clientY-swipe.y;if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>12){swipe=null;return;}if(Math.abs(dx)>=36){rotate(dx>0?1:-1);swipe.x=e.clientX;swipe.y=e.clientY;}});
-for(const name of ['pointerup','pointercancel','pointerleave'])$('stage').addEventListener(name,()=>swipe=null);
+const touches=new Set();
+$('stage').addEventListener('pointerdown',e=>{
+ if(e.pointerType==='mouse'||e.target.closest('button,input,.zoom'))return;
+ touches.add(e.pointerId);if(touches.size!==1){swipe=null;return;}
+ swipe={id:e.pointerId,x:e.clientX,y:e.clientY,zoom,axis:null,steps:0};
+ $('stage').setPointerCapture(e.pointerId);
+});
+$('stage').addEventListener('pointermove',e=>{
+ if(!swipe||swipe.id!==e.pointerId)return;
+ const dx=e.clientX-swipe.x,dy=e.clientY-swipe.y;
+ if(!swipe.axis){if(Math.max(Math.abs(dx),Math.abs(dy))<8)return;swipe.axis=Math.abs(dy)>Math.abs(dx)?'zoom':'rotate';}
+ if(swipe.axis==='zoom')setZoom(swipe.zoom-dy/45);
+ else{const steps=Math.trunc(dx/36),delta=steps-swipe.steps;if(delta){rotate(delta);swipe.steps=steps;}}
+});
+for(const name of ['pointerup','pointercancel','lostpointercapture'])$('stage').addEventListener(name,e=>{touches.delete(e.pointerId);if(swipe?.id===e.pointerId)swipe=null;});
 
 initMobileControls();
