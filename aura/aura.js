@@ -3196,8 +3196,8 @@ async function createAura() {
   const view = mat4.create(), projection = mat4.create(), fog = { use: false, exist: false, near: 0, far: 100, color: [0, 0, 0] };
   let last = 0, lastPlacement = "";
   return { draw(ctx, x, y, scale, animate = true) {
-    const unit = 7 * scale;
-    mat4.ortho(projection, -x / unit, (800 - x) / unit, -(640 - y) / unit, y / unit, -100, 100);
+    const unit = 35 * scale;
+    mat4.ortho(projection, -400 / unit, 400 / unit, -320 / unit, 320 / unit, -100, 100);
     mat4.identity(view);
     mat4.rotateX(view, view, 235 * Math.PI / 180);
     const now = performance.now();
@@ -3229,7 +3229,7 @@ async function createAura() {
       last = now;
       lastPlacement = placement;
     }
-    ctx.drawImage(composited, 0, 0, 800, 640);
+    ctx.drawImage(composited, x - 400, y - 320, 800, 640);
   }, dispose() {
     var _a;
     effects.forEach((e) => e.free(gl));

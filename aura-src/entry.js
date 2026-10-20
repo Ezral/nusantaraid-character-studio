@@ -18,8 +18,9 @@ export async function createAura(){
  const view=mat4.create(),projection=mat4.create(),fog={use:false,exist:false,near:0,far:100,color:[0,0,0]};
  let last=0,lastPlacement='';
  return {draw(ctx,x,y,scale,animate=true){
-  // Match the sprite preview's pixel scale and place the RO ground plane at its feet.
-  const unit=7*scale;mat4.ortho(projection,-x/unit,(800-x)/unit,-(640-y)/unit,y/unit,-100,100);
+  // Original RO shaders divide sprite pixels by 35. Restore those units here;
+  // the caller applies the same ACT origin and zoom transform as the character.
+  const unit=35*scale;mat4.ortho(projection,-400/unit,400/unit,-320/unit,320/unit,-100,100);
   mat4.identity(view);mat4.rotateX(view,view,235*Math.PI/180);
   const now=performance.now();
   const placement=[x,y,scale].join(',');
@@ -33,6 +34,6 @@ export async function createAura(){
    for(let i=0;i<data.length;i+=4){const light=Math.max(data[i],data[i+1],data[i+2]);data[i+3]=light;if(light){data[i]=data[i]*255/light;data[i+1]=data[i+1]*255/light;data[i+2]=data[i+2]*255/light;}}
    pixels.putImageData(image,0,0);last=now;lastPlacement=placement;
   }
-  ctx.drawImage(composited,0,0,800,640);
+  ctx.drawImage(composited,x-400,y-320,800,640);
  },dispose(){effects.forEach(e=>e.free(gl));classes.forEach(C=>C.free(gl));gl.getExtension('WEBGL_lose_context')?.loseContext();}};
 }

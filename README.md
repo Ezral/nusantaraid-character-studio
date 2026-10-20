@@ -2,7 +2,7 @@
 
 Standalone static Ragnarok character preview hosted on GitHub Pages. No extension, login, or game connection required.
 
-Choose gender, classic job, hair style, hair color (0–263), and clothing color (0–699). Rotate through eight directions using a mouse wheel, arrows, keyboard, or a horizontal touch drag. Zoom with the slider or buttons. On mobile, hair and clothing palettes use horizontal snap selectors; equipment uses per-slot type-to-search pickers. The compact preview stays visible while scrolling on taller phones. All controls remain usable on narrow and landscape screens.
+Choose gender, classic job, hair style, hair color (0–263), and clothing color (0–699). Rotate through eight directions using a mouse wheel, arrows, keyboard, or a horizontal touch drag. Zoom with the slider or buttons. On mobile, gender, job, hairstyle and palettes use wrapping horizontal snap selectors. The viewer occupies the upper half of the available screen; controls scroll independently in the lower half. Equipment uses a single per-slot searchable combobox on desktop and mobile, with a 250 ms typing debounce. All controls remain usable on narrow and landscape screens.
 
 Backgrounds are Light or Dark. PNG export stays transparent. Display settings and appearance persist locally; Reset restores defaults.
 
@@ -18,7 +18,7 @@ To refresh the catalogue, run npm run update:catalogue. The generator downloads 
 
 The aura uses roBrowserLegacy's original GroundAura, SwirlingAura, and Level99Bubble classes and shaders, preserved unchanged under vendor/aura. Its original pikapika2.bmp, ring_blue.tga, and whitelight.tga textures are loaded from Niktout. The custom 2D aura imitation has been removed.
 
-A small WebGL 2 host provides a flat ground plane, the preview camera, texture loading, and additive-light transparency conversion for canvas/PNG composition. These adapters do not replace the original effect geometry or animation. Reduced-motion mode displays a static frame. Aura animation stops rendering when disabled or the document is hidden. WebGL 2 is required for the aura.
+A small WebGL 2 host provides a flat ground plane, the preview camera, texture loading, and additive-light transparency conversion for canvas/PNG composition. These adapters do not replace the original effect geometry or animation. The aura uses the character ACT origin and the same canvas zoom transform, with the original shaders' 35 sprite-pixels-per-world-unit conversion. Reduced-motion mode displays a static frame. Aura animation stops rendering when disabled or the document is hidden. WebGL 2 is required for the aura.
 
 Run npm ci and npm run build:aura to regenerate the committed aura/aura.js bundle. Normal static hosting needs no build step. Shader/class source equality, equipment loading, desktop controls, touch rotation, palette scrolling, mobile search, reset, and responsive widths were checked in Chromium; physical iOS/Android device testing has not been performed.
 
