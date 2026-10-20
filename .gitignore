@@ -1,3 +1,5 @@
 node_modules/
 scene/
 scene-src/robrowser/
+
+.cache/

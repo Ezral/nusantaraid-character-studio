@@ -1,17 +1,27 @@
 # NusantaraID Character Studio
-Standalone, static character preview. Serve this directory with any HTTP server or GitHub Pages. No extension, login or game connection required.
 
-Controls: gender, classic job, hair style, hair palette, clothing palette; wheel/arrow buttons/keyboard rotate eight directions; zoom slider and +/-; transparent PNG export. Selection saves locally. Bard/Dancer gender is synchronized.
+Standalone static Ragnarok character preview hosted on GitHub Pages. No extension, login, or game connection required.
 
-Hair palette selectors cover 0–263; costume palettes cover 0–699 inclusive. Palettes load from Niktout Classic’s public client endpoint (https://classicweb.niktoutro.com/client/), which includes the extended colors missing from the generic roBrowser endpoint. Hair 263 and costume 699 were verified with real sprites; hair 264–269 returned missing for the tested head. Palette 0 uses original sprite colors. Other palettes load on demand; availability depends on the selected job, gender, and asset source.
+Choose gender, classic job, hair style, hair color (0–263), and clothing color (0–699). Rotate through eight directions using a mouse wheel, arrows, keyboard, or a horizontal touch drag. Zoom with the slider or buttons. On mobile, hair and clothing palettes use horizontal snap selectors; equipment uses per-slot type-to-search pickers. The compact preview stays visible while scrolling on taller phones. All controls remain usable on narrow and landscape screens.
 
-Display controls offer Prontera, Glast Heim, or no background and an animated level 99 aura preview. Background PNGs are fixed camera captures of actual GRF map terrain and buildings rendered with roBrowser; they are cropped to fill the preview. Aura uses the original `pikapika2.bmp` and `ring_blue.tga` textures with lightweight 2D animation, not the full game's 3D effect simulation. Display choices persist locally; Reset clears them. PNG export preserves transparency and includes the aura but excludes the backdrop.
+Backgrounds are Light or Dark. PNG export stays transparent. Display settings and appearance persist locally; Reset restores defaults.
 
-To regenerate background captures: place roBrowserLegacy's `src` directory at `scene-src/robrowser` (ignored), run `npm ci` and `node build-scene.mjs`, serve this directory, and capture `scene.html?map=prontera` and `scene.html?map=glast_01` after rendering completes. The camera presets are in `scene-src/entry.js`. The renderer bundle and upstream source copy are development-only and are not shipped with the static page. Map artwork remains copyright of its respective owners; the GPL covers the renderer code, not game art.
+## Niktout catalogue
 
-Headgear and costume controls provide upper, middle, and lower visual slots, plus costume garments/wings. Costume headgear overrides the ordinary headgear in the matching slot. Search the visual catalogue by name or view ID (not inventory item ID). The catalogue allows arbitrary visual combinations rather than enforcing item equip restrictions. Some source names are Korean. Server-specific custom items and newer sprites may be unavailable; missing items are reported and disable export. Garments render behind front-facing characters and in front when facing away.
+Character sprites, palettes, equipment, and aura textures load on demand from https://classicweb.niktoutro.com/client/. The item catalogue is generated from Niktout's public client bundle, accessory mappings, item display names, and descriptions. It currently contains 931 matched entries (852 regular headgear, 79 costumes), using actual item IDs and documented upper/middle/lower slots. Costume items override ordinary items in overlapping slots; conflicting items within the same category are cleared.
 
-Sprite and aura assets are fetched on demand from https://grf.robrowser.com/ (the public endpoint documented by roBrowser). Character sprites and palettes are not bundled. The backgrounds directory contains map scene captures. Availability and permission for production use of an asset endpoint should be agreed with its operator; this prototype does not establish redistribution rights for game artwork. Missing palettes explicitly fall back to original colors and disable PNG export. Server-specific dye/style limits are not claimed.
+This reflects the public client catalogue, not the server's private item database, shops, or obtainable-item list. Entries without a confirmed visual mapping and slot are omitted. No garment items could be matched in those tables, so that picker is hidden rather than populated with unrelated generic assets. Item class/job/level restrictions are not enforced by this appearance tool. Missing assets are reported and disable PNG export.
 
-## Credits / license
-GPL-3.0; see LICENSE. Sprite.js, Action.js, JobConst.js, JobNameTable.js, PalNameTable.js, HairIndexTable.js, HatTable.js, RobeTable.js, and Targa.js are from MrAntares/roBrowserLegacy (https://github.com/MrAntares/roBrowserLegacy), retaining original notices. Loader imports adapted for standalone use; minimal BinaryReader and canvas composition supplied here. No source from the Chrome extension is required. Poppins is distributed under fonts/OFL.txt.
+To refresh the catalogue, run npm run update:catalogue. The generator downloads only public client data into ignored .cache files and writes niktout-items.js.
+
+## Original level 99 aura
+
+The aura uses roBrowserLegacy's original GroundAura, SwirlingAura, and Level99Bubble classes and shaders, preserved unchanged under vendor/aura. Its original pikapika2.bmp, ring_blue.tga, and whitelight.tga textures are loaded from Niktout. The custom 2D aura imitation has been removed.
+
+A small WebGL 2 host provides a flat ground plane, the preview camera, texture loading, and additive-light transparency conversion for canvas/PNG composition. These adapters do not replace the original effect geometry or animation. Reduced-motion mode displays a static frame. Aura animation stops rendering when disabled or the document is hidden. WebGL 2 is required for the aura.
+
+Run npm ci and npm run build:aura to regenerate the committed aura/aura.js bundle. Normal static hosting needs no build step. Shader/class source equality, equipment loading, desktop controls, touch rotation, palette scrolling, mobile search, reset, and responsive widths were checked in Chromium; physical iOS/Android device testing has not been performed.
+
+## Credits and license
+
+GPL-3.0; see LICENSE. SPR/ACT/Targa loaders, job/hair/palette tables, and original aura effects are from MrAntares/roBrowserLegacy (https://github.com/MrAntares/roBrowserLegacy), retaining notices. gl-matrix retains its upstream license; Poppins is distributed under fonts/OFL.txt. Game artwork is fetched at runtime and is not covered by the code license. No Chrome extension source is required.
